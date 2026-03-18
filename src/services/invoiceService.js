@@ -1,3 +1,9 @@
+// MODO DEMO - Usando servicio mock
+import { invoiceService as mockInvoiceService } from './mockServices';
+export const invoiceService = mockInvoiceService;
+
+// CÓDIGO ORIGINAL DE FIREBASE (comentado para modo demo)
+/*
 import { 
   collection, 
   addDoc, 
@@ -185,3 +191,4 @@ export const invoiceService = {
     }
   }
 };
+*/

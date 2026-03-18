@@ -156,11 +156,34 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   border: 2px solid transparent;
+  overflow: hidden;
 }
 
 .product-card:hover {
   border-color: var(--primary-color);
   transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.product-card img {
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.05);
+}
+
+.product-card .card-body {
+  padding: 12px;
+}
+
+.product-card .card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cart-container {
@@ -206,6 +229,41 @@ body {
   .main-content {
     margin-left: 0 !important;
   }
+
+  .product-card img {
+    height: 120px !important;
+  }
+}
+
+/* Product Images */
+.product-image-container {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.product-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--primary-color);
+}
+
+.product-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  transition: transform 0.3s ease;
+}
+
+.product-thumbnail:hover {
+  transform: scale(1.1);
+  border-color: var(--primary-color);
 }
 
 /* Loading Spinner */
@@ -263,4 +321,215 @@ body {
   top: 50%;
   transform: translateY(-50%);
   color: #6c757d;
+}
+
+/* ========================================
+   ESTILOS PARA TIENDA ONLINE
+   ======================================== */
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 60px 0;
+  margin-bottom: 40px;
+}
+
+.hero-section h1 {
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.hero-section .search-box {
+  background: white;
+  border-radius: 50px;
+  padding: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+/* Store Product Cards */
+.product-card-store {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  height: 100%;
+}
+
+.product-card-store:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  border-color: var(--primary-color);
+}
+
+.product-card-store img {
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.product-card-store:hover img {
+  transform: scale(1.05);
+}
+
+.product-card-store .card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card-store .card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  margin-bottom: 8px;
+}
+
+.product-card-store .badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+}
+
+/* Store Navbar */
+.navbar.sticky-top {
+  z-index: 1030;
+}
+
+.navbar-brand img {
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img {
+  transform: scale(1.1);
+}
+
+/* Customer Cart Offcanvas */
+.offcanvas-end {
+  border-left: 3px solid var(--primary-color);
+}
+
+/* Order Confirmation */
+.order-confirmation-icon {
+  animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Customer Orders Page */
+.order-card {
+  transition: all 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+/* Category Filters */
+.category-filter-btn {
+  transition: all 0.3s ease;
+  border-radius: 25px;
+  padding: 8px 20px;
+  font-weight: 500;
+}
+
+.category-filter-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Empty States */
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 80px;
+  color: #dee2e6;
+  margin-bottom: 20px;
+}
+
+/* Toast Notifications */
+.toast {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.toast-header {
+  border-radius: 12px 12px 0 0;
+  font-weight: 600;
+}
+
+/* Responsive Store */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 40px 0;
+  }
+  
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+  
+  .product-card-store img {
+    height: 200px !important;
+  }
+  
+  .offcanvas-end {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Loading States */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Price Display */
+.price-display {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Stock Badge */
+.stock-badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+/* Checkout Form */
+.checkout-form .form-label {
+  font-weight: 600;
+  color: var(--dark-text);
+  margin-bottom: 8px;
+}
+
+.checkout-form .form-control,
+.checkout-form .form-select {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+}
+
+.checkout-form .form-control:focus,
+.checkout-form .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(139, 69, 19, 0.15);
 }

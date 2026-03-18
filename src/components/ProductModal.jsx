@@ -9,6 +9,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
     cost: '',
     stock: '',
     category: '',
+    image: '',
     active: true
   });
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
         cost: product.cost || '',
         stock: product.stock || '',
         category: product.category || '',
+        image: product.image || '',
         active: product.active !== undefined ? product.active : true
       });
     }
@@ -158,6 +160,35 @@ const ProductModal = ({ product, onClose, onSave }) => {
                   onChange={handleChange}
                   placeholder="Descripción del producto"
                 ></textarea>
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="image" className="form-label">URL de Imagen</label>
+                <input
+                  type="url"
+                  className="form-control"
+                  id="image"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleChange}
+                  placeholder="https://images.unsplash.com/photo-..."
+                />
+                <small className="text-muted">
+                  Usa imágenes de Unsplash: busca en unsplash.com y copia la URL
+                </small>
+                {formData.image && (
+                  <div className="mt-2">
+                    <img 
+                      src={formData.image} 
+                      alt="Preview" 
+                      className="img-thumbnail"
+                      style={{ maxHeight: '150px', objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="row">

@@ -5,12 +5,12 @@ const Sidebar = () => {
   const { isAdmin } = useAuth();
 
   const menuItems = [
-    { path: '/dashboard', icon: 'bi-speedometer2', label: 'Dashboard', roles: ['admin', 'empleado'] },
-    { path: '/sales', icon: 'bi-cart-plus', label: 'Ventas', roles: ['admin', 'empleado'] },
-    { path: '/products', icon: 'bi-box-seam', label: 'Productos', roles: ['admin'] },
-    { path: '/inventory', icon: 'bi-clipboard-data', label: 'Inventario', roles: ['admin'] },
-    { path: '/invoices', icon: 'bi-receipt', label: 'Facturas', roles: ['admin', 'empleado'] },
-    { path: '/sales-history', icon: 'bi-clock-history', label: 'Historial', roles: ['admin', 'empleado'] }
+    { path: '/admin/dashboard', icon: 'bi-speedometer2', label: 'Dashboard', roles: ['admin', 'empleado'] },
+    { path: '/admin/sales', icon: 'bi-cart-plus', label: 'Ventas', roles: ['admin', 'empleado'] },
+    { path: '/admin/products', icon: 'bi-box-seam', label: 'Productos', roles: ['admin'] },
+    { path: '/admin/inventory', icon: 'bi-clipboard-data', label: 'Inventario', roles: ['admin'] },
+    { path: '/admin/invoices', icon: 'bi-receipt', label: 'Facturas', roles: ['admin', 'empleado'] },
+    { path: '/admin/sales-history', icon: 'bi-clock-history', label: 'Historial', roles: ['admin', 'empleado'] }
   ];
 
   const userRole = isAdmin() ? 'admin' : 'empleado';
@@ -19,10 +19,23 @@ const Sidebar = () => {
     <div className="sidebar position-fixed" style={{ width: '250px', zIndex: 1000 }}>
       <div className="p-3">
         <div className="text-center mb-4">
-          <h4 className="text-white mb-0">
-            <i className="bi bi-shop me-2"></i>
-            Bakery POS
-          </h4>
+          <img 
+            src="/logo.png" 
+            alt="Postrecitos de Mamá" 
+            className="mb-2"
+            style={{ 
+              width: '100px', 
+              height: '100px', 
+              borderRadius: '50%',
+              border: '3px solid rgba(255,255,255,0.3)',
+              objectFit: 'cover',
+              backgroundColor: '#fff',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+            }}
+          />
+          <h5 className="text-white mb-0" style={{ fontWeight: '600', marginTop: '10px' }}>
+            Postrecitos de Mamá
+          </h5>
           <small className="text-white-50">Sistema de Repostería</small>
         </div>
         

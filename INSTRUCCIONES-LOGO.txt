@@ -1,0 +1,115 @@
+═══════════════════════════════════════════════════════════════
+  INSTRUCCIONES PARA AGREGAR EL LOGO - Postrecitos de Mamá
+═══════════════════════════════════════════════════════════════
+
+PASO 1: GUARDAR LA IMAGEN
+──────────────────────────
+1. Abre la imagen del logo que te mostré en el chat
+2. Click derecho sobre la imagen
+3. Selecciona "Guardar imagen como..." o "Save image as..."
+4. Guárdala con el nombre EXACTO: logo.png
+5. Asegúrate de que sea formato PNG
+
+
+PASO 2: UBICAR LA CARPETA PUBLIC
+──────────────────────────────────
+La ruta completa es:
+C:\Users\felisander_melo\Documents\PostrecitosRD\public\
+
+Dentro de tu proyecto verás esta estructura:
+PostrecitosRD/
+├── public/          ← AQUÍ va el logo
+│   └── logo.png     ← Coloca el archivo aquí
+├── src/
+├── node_modules/
+└── ...
+
+
+PASO 3: COPIAR EL ARCHIVO
+──────────────────────────
+1. Abre el Explorador de Windows
+2. Navega a: C:\Users\felisander_melo\Documents\PostrecitosRD\public\
+3. Pega el archivo logo.png que guardaste
+4. Verifica que el nombre sea exactamente: logo.png (minúsculas)
+
+
+PASO 4: VERIFICAR
+──────────────────
+Después de copiar el archivo:
+1. Ve al navegador donde está la aplicación
+2. Presiona F5 o Ctrl+R para recargar
+3. El logo debería aparecer en:
+   - Página de login (arriba, grande)
+   - Menú lateral (arriba, pequeño)
+
+
+═══════════════════════════════════════════════════════════════
+  SOLUCIÓN DE PROBLEMAS
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA: El logo no aparece
+────────────────────────────
+✓ Verifica que el archivo se llame exactamente: logo.png
+✓ Verifica que esté en la carpeta: public/
+✓ Recarga la página con Ctrl + F5 (recarga forzada)
+✓ Verifica que el archivo no esté corrupto
+
+
+PROBLEMA: Aparece un icono en lugar del logo
+─────────────────────────────────────────────
+✓ Esto es normal si el archivo logo.png no existe
+✓ El sistema muestra un icono de tienda como respaldo
+✓ Agrega el archivo logo.png y recarga
+
+
+PROBLEMA: El logo se ve mal
+────────────────────────────
+✓ Usa una imagen cuadrada (mismo ancho y alto)
+✓ Tamaño recomendado: 500x500px o mayor
+✓ Formato: PNG con fondo transparente (preferible)
+
+
+═══════════════════════════════════════════════════════════════
+  ALTERNATIVA: USAR OTRA IMAGEN
+═══════════════════════════════════════════════════════════════
+
+Si no tienes la imagen original, puedes:
+
+1. Buscar una imagen similar en Google
+2. Descargarla y guardarla como logo.png
+3. Colocarla en public/logo.png
+4. Recargar la página
+
+Requisitos de la imagen:
+- Formato: PNG (preferible) o JPG
+- Tamaño: 500x500px o mayor
+- Forma: Cuadrada
+- Fondo: Transparente (PNG) o blanco
+
+
+═══════════════════════════════════════════════════════════════
+  VERIFICACIÓN RÁPIDA
+═══════════════════════════════════════════════════════════════
+
+Ejecuta estos comandos en PowerShell para verificar:
+
+cd C:\Users\felisander_melo\Documents\PostrecitosRD
+dir public\logo.png
+
+Si el archivo existe, verás algo como:
+    Directory: C:\Users\felisander_melo\Documents\PostrecitosRD\public
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        11/03/2024   10:00 AM         123456 logo.png
+
+
+═══════════════════════════════════════════════════════════════
+  CONTACTO
+═══════════════════════════════════════════════════════════════
+
+Si necesitas ayuda adicional:
+- Revisa el archivo: LOGO-SETUP.md
+- Revisa el archivo: BRANDING-UPDATE.md
+
+═══════════════════════════════════════════════════════════════

@@ -1,3 +1,9 @@
+// MODO DEMO - Usando servicio mock
+import { orderService as mockOrderService } from './mockServices';
+export const orderService = mockOrderService;
+
+// CÓDIGO ORIGINAL DE FIREBASE (comentado para modo demo)
+/*
 import { 
   collection, 
   addDoc, 
@@ -208,3 +214,4 @@ export const orderService = {
     }
   }
 };
+*/

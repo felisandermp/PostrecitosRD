@@ -11,7 +11,7 @@ const Login = () => {
   const { user, login } = useAuth();
 
   if (user) {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/admin/dashboard" />;
   }
 
   const handleSubmit = async (e) => {
@@ -37,8 +37,23 @@ const Login = () => {
             <div className="card shadow-lg border-0" style={{ borderRadius: '15px' }}>
               <div className="card-body p-5">
                 <div className="text-center mb-4">
-                  <i className="bi bi-shop display-4 text-primary mb-3"></i>
-                  <h2 className="card-title mb-2">Bakery POS</h2>
+                  <img 
+                    src="/logo.png" 
+                    alt="Postrecitos de Mamá" 
+                    className="mb-3"
+                    style={{ 
+                      width: '150px', 
+                      height: '150px', 
+                      borderRadius: '50%',
+                      border: '4px solid #8B4513',
+                      objectFit: 'cover',
+                      boxShadow: '0 4px 15px rgba(139, 69, 19, 0.3)',
+                      backgroundColor: '#fff'
+                    }}
+                  />
+                  <h2 className="card-title mb-2" style={{ color: '#8B4513', fontWeight: '700' }}>
+                    Postrecitos de Mamá
+                  </h2>
                   <p className="text-muted">Sistema de Repostería</p>
                 </div>
 
@@ -103,7 +118,7 @@ const Login = () => {
 
                 <div className="text-center mt-4">
                   <small className="text-muted">
-                    Demo: admin@bakery.com / 123456
+                    Demo: admin@postrecitos.com / 123456
                   </small>
                 </div>
               </div>

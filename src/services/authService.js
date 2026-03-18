@@ -1,12 +1,23 @@
-import { 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged,
-  createUserWithEmailAndPassword 
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './firebase';
+// MODO DEMO - Usando autenticación mock
+// Para usar Firebase real, descomenta las importaciones de abajo y comenta la línea de mockAuth
 
+// import { 
+//   signInWithEmailAndPassword, 
+//   signOut, 
+//   onAuthStateChanged,
+//   createUserWithEmailAndPassword 
+// } from 'firebase/auth';
+// import { doc, setDoc, getDoc } from 'firebase/firestore';
+// import { auth, db } from './firebase';
+
+// Importar servicio mock para demostración
+import { authService as mockAuthService } from './mockAuth';
+
+// Exportar el servicio mock
+export const authService = mockAuthService;
+
+// CÓDIGO ORIGINAL DE FIREBASE (comentado para modo demo)
+/*
 export const authService = {
   // Login
   async login(email, password) {
@@ -88,3 +99,4 @@ export const authService = {
     return errorMessages[errorCode] || 'Error de autenticación';
   }
 };
+*/

@@ -1,7 +1,9 @@
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { getCartCount, openCart } = useCart();
 
   const handleLogout = async () => {
     try {
@@ -10,6 +12,8 @@ const Navbar = () => {
       console.error('Error al cerrar sesión:', error);
     }
   };
+
+  const cartCount = getCartCount();
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom">
@@ -29,6 +33,21 @@ const Navbar = () => {
         </div>
 
         <div className="d-flex align-items-center">
+          {/* Botón del Carrito */}
+          <button
+            className="btn btn-outline-primary position-relative me-3"
+            onClick={openCart}
+            title="Ver carrito"
+          >
+            <i className="bi bi-cart3 fs-5"></i>
+            {cartCount > 0 && (
+              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {cartCount}
+                <span className="visually-hidden">items en carrito</span>
+              </span>
+            )}
+          </button>
+
           <span className="badge bg-primary me-3">
             {user?.role === 'admin' ? 'Administrador' : 'Empleado'}
           </span>

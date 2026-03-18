@@ -151,6 +151,7 @@ const Dashboard = () => {
                       <tr>
                         <th>Hora</th>
                         <th>Productos</th>
+                        <th>Tipo</th>
                         <th>Total</th>
                         <th>Método Pago</th>
                       </tr>
@@ -165,6 +166,17 @@ const Dashboard = () => {
                             <small>
                               {order.products.map(p => p.name).join(', ')}
                             </small>
+                          </td>
+                          <td>
+                            {order.type === 'online' ? (
+                              <span className="badge bg-info">
+                                <i className="bi bi-globe"></i>
+                              </span>
+                            ) : (
+                              <span className="badge bg-secondary">
+                                <i className="bi bi-shop"></i>
+                              </span>
+                            )}
                           </td>
                           <td>
                             <strong>${order.total.toFixed(2)}</strong>

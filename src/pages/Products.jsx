@@ -137,6 +137,7 @@ const Products = () => {
               <table className="table table-hover">
                 <thead>
                   <tr>
+                    <th>Imagen</th>
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th>Precio</th>
@@ -149,6 +150,27 @@ const Products = () => {
                 <tbody>
                   {filteredProducts.map(product => (
                     <tr key={product.id}>
+                      <td>
+                        {product.image ? (
+                          <img 
+                            src={product.image} 
+                            alt={product.name}
+                            className="rounded"
+                            style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'inline-block';
+                            }}
+                          />
+                        ) : null}
+                        <i 
+                          className="bi bi-box text-muted" 
+                          style={{ 
+                            fontSize: '2rem',
+                            display: product.image ? 'none' : 'inline-block'
+                          }}
+                        ></i>
+                      </td>
                       <td>
                         <div>
                           <strong>{product.name}</strong>

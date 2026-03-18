@@ -1,3 +1,9 @@
+// MODO DEMO - Usando servicio mock
+import { inventoryService as mockInventoryService } from './mockServices';
+export const inventoryService = mockInventoryService;
+
+// CÓDIGO ORIGINAL DE FIREBASE (comentado para modo demo)
+/*
 import { 
   collection, 
   addDoc, 
@@ -179,3 +185,4 @@ export const inventoryService = {
     }
   }
 };
+*/

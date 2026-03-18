@@ -142,6 +142,7 @@ const Invoices = () => {
                     <th>Número</th>
                     <th>Fecha</th>
                     <th>Cliente</th>
+                    <th>Tipo</th>
                     <th>Método Pago</th>
                     <th>Subtotal</th>
                     <th>IVA</th>
@@ -164,6 +165,28 @@ const Invoices = () => {
                       </td>
                       <td>
                         {invoice.customer?.name || 'Cliente General'}
+                        {invoice.customer?.phone && (
+                          <>
+                            <br />
+                            <small className="text-muted">
+                              <i className="bi bi-telephone me-1"></i>
+                              {invoice.customer.phone}
+                            </small>
+                          </>
+                        )}
+                      </td>
+                      <td>
+                        {invoice.type === 'online' ? (
+                          <span className="badge bg-info">
+                            <i className="bi bi-globe me-1"></i>
+                            Online
+                          </span>
+                        ) : (
+                          <span className="badge bg-secondary">
+                            <i className="bi bi-shop me-1"></i>
+                            Tienda
+                          </span>
+                        )}
                       </td>
                       <td>
                         <span className="badge bg-secondary">

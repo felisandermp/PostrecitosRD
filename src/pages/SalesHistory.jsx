@@ -256,6 +256,7 @@ const SalesHistory = () => {
                       <tr>
                         <th>Fecha/Hora</th>
                         <th>Productos</th>
+                        <th>Tipo</th>
                         <th>Método Pago</th>
                         <th>Total</th>
                         <th>Acciones</th>
@@ -286,6 +287,19 @@ const SalesHistory = () => {
                                 </small>
                               )}
                             </div>
+                          </td>
+                          <td>
+                            {order.type === 'online' ? (
+                              <span className="badge bg-info">
+                                <i className="bi bi-globe me-1"></i>
+                                Online
+                              </span>
+                            ) : (
+                              <span className="badge bg-secondary">
+                                <i className="bi bi-shop me-1"></i>
+                                Tienda
+                              </span>
+                            )}
                           </td>
                           <td>
                             <span className="badge bg-secondary">
