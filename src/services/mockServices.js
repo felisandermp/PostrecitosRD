@@ -322,9 +322,9 @@ export const orderService = {
 export const invoiceService = {
   async createInvoice(orderData) {
     await new Promise(resolve => setTimeout(resolve, 200));
-    
+
     const invoiceNumber = await this.generateInvoiceNumber();
-    
+
     const invoice = {
       id: mockDB.generateId(),
       invoiceNumber,
@@ -342,7 +342,7 @@ export const invoiceService = {
 
     mockDB.invoices.push(invoice);
     mockDB.save();
-    
+
     return invoice;
   },
 
@@ -355,28 +355,28 @@ export const invoiceService = {
 
   async getInvoices(limit = 50) {
     await new Promise(resolve => setTimeout(resolve, 200));
-    
+
     // Combinar facturas de mockDB y localStorage
     const mockInvoices = [...mockDB.invoices];
     const localInvoices = JSON.parse(localStorage.getItem('invoices') || '[]');
-    
+
     // Convertir fechas de localStorage al formato esperado
     const formattedLocalInvoices = localInvoices.map(invoice => ({
       ...invoice,
-      date: invoice.date?.seconds 
-        ? invoice.date 
+      date: invoice.date?.seconds
+        ? invoice.date
         : mockDB.createTimestamp(new Date(invoice.date)),
-      createdAt: invoice.createdAt?.seconds 
-        ? invoice.createdAt 
+      createdAt: invoice.createdAt?.seconds
+        ? invoice.createdAt
         : mockDB.createTimestamp(new Date(invoice.date))
     }));
-    
+
     // Combinar y eliminar duplicados por ID
     const allInvoices = [...mockInvoices, ...formattedLocalInvoices];
     const uniqueInvoices = allInvoices.filter((invoice, index, self) =>
       index === self.findIndex(i => i.id === invoice.id)
     );
-    
+
     return uniqueInvoices
       .sort((a, b) => b.createdAt.seconds - a.createdAt.seconds)
       .slice(0, limit);
@@ -391,80 +391,203 @@ export const invoiceService = {
     return { ...invoice };
   },
 
-  generateInvoicePDF(invoice) {
-    // Importar jsPDF dinámicamente
+  async generateInvoicePDF(invoice) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
-    // Encabezado
-    doc.setFontSize(20);
-    doc.text('FACTURA', 105, 20, { align: 'center' });
-    
-    // Información de la empresa
-    doc.setFontSize(12);
-    doc.text('Postrecitos de Mamá', 20, 40);
-    doc.text('Dirección: Calle Principal #123', 20, 50);
-    doc.text('Teléfono: (809) 753-5382', 20, 60);
-    doc.text('Email: info@postrecitos.com', 20, 70);
-    
-    // Información de la factura
-    doc.text(`Factura No: ${invoice.invoiceNumber}`, 120, 40);
-    doc.text(`Fecha: ${new Date(invoice.date.seconds * 1000).toLocaleDateString()}`, 120, 50);
-    doc.text(`Método de Pago: ${invoice.paymentMethod}`, 120, 60);
-    
-    // Cliente (si existe)
-    if (invoice.customer) {
-      doc.text(`Cliente: ${invoice.customer.name || 'Cliente General'}`, 120, 70);
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Colores de marca
+    const brown = [139, 69, 19];
+    const darkBrown = [101, 50, 14];
+    const cream = [255, 248, 240];
+    const lightBrown = [210, 105, 30];
+    const white = [255, 255, 255];
+
+    // Header bar marron
+    doc.setFillColor(...brown);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+
+    // Logo en alta resolucion - fondo marron para fusionar con header
+    try {
+      const logoData = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const size = Math.max(img.naturalWidth, img.naturalHeight, 400);
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          // Pintar fondo con el mismo marron del header para que se funda
+          ctx.fillStyle = 'rgb(139, 69, 19)';
+          ctx.fillRect(0, 0, size, size);
+          ctx.drawImage(img, 0, 0, size, size);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = reject;
+        img.src = '/logo.png';
+      });
+      doc.addImage(logoData, 'PNG', 10, 2, 36, 36);
+    } catch (e) {
+      // Continuar sin logo si falla
     }
-    
+
+    // Nombre empresa en header
+    doc.setTextColor(...white);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Postrecitos de Mama', 50, 18);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Reposteria Artesanal', 50, 26);
+    doc.text('Tel: (809) 753-5382  |  info@postrecitos.com', 50, 33);
+
+    // Titulo FACTURA
+    doc.setTextColor(...darkBrown);
+    doc.setFontSize(26);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FACTURA', pageWidth - 15, 58, { align: 'right' });
+
+    // Info factura (derecha)
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    const invoiceDate = new Date(invoice.date.seconds * 1000);
+    const dateStr = invoiceDate.toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric' });
+    doc.text('No: ' + invoice.invoiceNumber, pageWidth - 15, 66, { align: 'right' });
+    doc.text('Fecha: ' + dateStr, pageWidth - 15, 73, { align: 'right' });
+    doc.text('Pago: ' + invoice.paymentMethod, pageWidth - 15, 80, { align: 'right' });
+
+    // Seccion cliente (fondo crema)
+    doc.setFillColor(...cream);
+    doc.roundedRect(14, 90, pageWidth - 28, 22, 3, 3, 'F');
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...darkBrown);
+    doc.text('Cliente:', 20, 100);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(60, 60, 60);
+    const customerName = invoice.customer?.name || 'Cliente General';
+    const customerPhone = invoice.customer?.phone ? ('  |  Tel: ' + invoice.customer.phone) : '';
+    doc.text(customerName + customerPhone, 48, 100);
+    if (invoice.customer?.email) {
+      doc.text('Email: ' + invoice.customer.email, 20, 108);
+    }
+
+    // Linea decorativa
+    doc.setDrawColor(...lightBrown);
+    doc.setLineWidth(0.8);
+    doc.line(14, 118, pageWidth - 14, 118);
+
     // Tabla de productos
     const tableData = invoice.products.map(item => [
       item.name,
       item.quantity.toString(),
-      `$${item.price.toFixed(2)}`,
-      `$${item.subtotal.toFixed(2)}`
+      'RD$ ' + item.price.toFixed(2),
+      'RD$ ' + item.subtotal.toFixed(2)
     ]);
-    
+
     doc.autoTable({
-      startY: 90,
-      head: [['Producto', 'Cantidad', 'Precio Unit.', 'Subtotal']],
+      startY: 124,
+      head: [['Producto', 'Cant.', 'Precio Unit.', 'Subtotal']],
       body: tableData,
       theme: 'striped',
-      headStyles: { fillColor: [41, 128, 185] }
+      headStyles: {
+        fillColor: brown,
+        textColor: white,
+        fontStyle: 'bold',
+        fontSize: 11,
+        halign: 'center'
+      },
+      bodyStyles: {
+        fontSize: 10,
+        textColor: [50, 50, 50]
+      },
+      alternateRowStyles: {
+        fillColor: [255, 245, 235]
+      },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 75 },
+        1: { halign: 'center', cellWidth: 25 },
+        2: { halign: 'right', cellWidth: 40 },
+        3: { halign: 'right', cellWidth: 40 }
+      },
+      margin: { left: 14, right: 14 },
+      styles: {
+        cellPadding: 5,
+        lineColor: [220, 200, 180],
+        lineWidth: 0.3
+      }
     });
-    
-    // Totales
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.text(`Subtotal: $${invoice.subtotal.toFixed(2)}`, 120, finalY);
-    
-    if (invoice.tax > 0) {
-      doc.text(`Impuestos: $${invoice.tax.toFixed(2)}`, 120, finalY + 10);
-      doc.text(`Total: $${invoice.total.toFixed(2)}`, 120, finalY + 20);
-    } else {
-      doc.text(`Total: $${invoice.total.toFixed(2)}`, 120, finalY + 10);
-    }
-    
-    // Pie de página
+
+    // Totales (caja crema a la derecha)
+    const finalY = doc.lastAutoTable.finalY + 8;
+    const totalsX = pageWidth - 14 - 80;
+    const totalsH = invoice.tax > 0 ? 42 : 30;
+
+    doc.setFillColor(...cream);
+    doc.roundedRect(totalsX, finalY, 80, totalsH, 3, 3, 'F');
+
     doc.setFontSize(10);
-    doc.text('¡Gracias por su compra!', 105, 280, { align: 'center' });
-    
+    doc.setTextColor(80, 80, 80);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Subtotal:', totalsX + 5, finalY + 10);
+    doc.text('RD$ ' + invoice.subtotal.toFixed(2), totalsX + 75, finalY + 10, { align: 'right' });
+
+    if (invoice.tax > 0) {
+      doc.text('ITBIS:', totalsX + 5, finalY + 20);
+      doc.text('RD$ ' + invoice.tax.toFixed(2), totalsX + 75, finalY + 20, { align: 'right' });
+
+      doc.setDrawColor(...lightBrown);
+      doc.setLineWidth(0.5);
+      doc.line(totalsX + 5, finalY + 25, totalsX + 75, finalY + 25);
+
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...darkBrown);
+      doc.text('Total:', totalsX + 5, finalY + 35);
+      doc.text('RD$ ' + invoice.total.toFixed(2), totalsX + 75, finalY + 35, { align: 'right' });
+    } else {
+      doc.setDrawColor(...lightBrown);
+      doc.setLineWidth(0.5);
+      doc.line(totalsX + 5, finalY + 14, totalsX + 75, finalY + 14);
+
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...darkBrown);
+      doc.text('Total:', totalsX + 5, finalY + 24);
+      doc.text('RD$ ' + invoice.total.toFixed(2), totalsX + 75, finalY + 24, { align: 'right' });
+    }
+
+    // Footer
+    const footerY = 272;
+    doc.setDrawColor(...lightBrown);
+    doc.setLineWidth(0.5);
+    doc.line(14, footerY, pageWidth - 14, footerY);
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(150, 120, 90);
+    doc.text('Gracias por preferirnos! Endulzamos tus momentos especiales.', pageWidth / 2, footerY + 8, { align: 'center' });
+    doc.text('Postrecitos de Mama  |  www.postrecitos.com  |  (809) 753-5382', pageWidth / 2, footerY + 15, { align: 'center' });
+
     return doc;
   },
 
-  downloadInvoicePDF(invoice) {
-    const doc = this.generateInvoicePDF(invoice);
-    doc.save(`Factura-${invoice.invoiceNumber}.pdf`);
+  async downloadInvoicePDF(invoice) {
+    const doc = await this.generateInvoicePDF(invoice);
+    doc.save('Factura-' + invoice.invoiceNumber + '.pdf');
   },
 
   async getInvoicesByDate(startDate, endDate) {
     await new Promise(resolve => setTimeout(resolve, 200));
-    
+
     const start = Math.floor(startDate.getTime() / 1000);
     const end = Math.floor(endDate.getTime() / 1000);
-    
+
     return mockDB.invoices
-      .filter(invoice => 
-        invoice.date.seconds >= start && 
+      .filter(invoice =>
+        invoice.date.seconds >= start &&
         invoice.date.seconds <= end
       )
       .sort((a, b) => b.date.seconds - a.date.seconds);

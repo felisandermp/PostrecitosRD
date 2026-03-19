@@ -10,6 +10,15 @@ const SalesHistory = () => {
   });
   const [stats, setStats] = useState(null);
 
+  const ORDER_STATUSES = [
+    { key: 'pendiente', label: 'Pendiente', color: 'warning' },
+    { key: 'confirmado', label: 'Confirmado', color: 'info' },
+    { key: 'en_preparacion', label: 'En Preparacion', color: 'primary' },
+    { key: 'listo', label: 'Listo para Entrega', color: 'success' },
+    { key: 'entregado', label: 'Entregado', color: 'secondary' },
+    { key: 'cancelado', label: 'Cancelado', color: 'danger' }
+  ];
+
   useEffect(() => {
     loadOrders();
   }, []);
@@ -66,6 +75,35 @@ const SalesHistory = () => {
   const clearFilters = () => {
     setDateRange({ startDate: '', endDate: '' });
     loadOrders();
+  };
+
+  const handleStatusChange = (orderId, newStatus) => {
+    // Actualizar en customerOrders (vista cliente)
+    const customerOrders = JSON.parse(localStorage.getItem('customerOrders') || '[]');
+    const custIdx = customerOrders.findIndex(o => o.id === orderId);
+    if (custIdx !== -1) {
+      customerOrders[custIdx].status = newStatus;
+      localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
+    }
+
+    // Actualizar en orders (admin localStorage)
+    const adminOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const adminIdx = adminOrders.findIndex(o => o.id === orderId);
+    if (adminIdx !== -1) {
+      adminOrders[adminIdx].status = newStatus;
+      localStorage.setItem('orders', JSON.stringify(adminOrders));
+    }
+
+    // Actualizar en mockOrders (mockDB)
+    const mockOrders = JSON.parse(localStorage.getItem('mockOrders') || '[]');
+    const mockIdx = mockOrders.findIndex(o => o.id === orderId);
+    if (mockIdx !== -1) {
+      mockOrders[mockIdx].status = newStatus;
+      localStorage.setItem('mockOrders', JSON.stringify(mockOrders));
+    }
+
+    // Actualizar estado local
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
   };
 
   const exportToCSV = () => {
@@ -257,7 +295,8 @@ const SalesHistory = () => {
                         <th>Fecha/Hora</th>
                         <th>Productos</th>
                         <th>Tipo</th>
-                        <th>Método Pago</th>
+                        <th>Estado</th>
+                        <th>Pago</th>
                         <th>Total</th>
                         <th>Acciones</th>
                       </tr>
@@ -299,6 +338,22 @@ const SalesHistory = () => {
                                 <i className="bi bi-shop me-1"></i>
                                 Tienda
                               </span>
+                            )}
+                          </td>
+                          <td>
+                            {order.type === 'online' ? (
+                              <select
+                                className="form-select form-select-sm"
+                                value={order.status || 'completado'}
+                                onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                style={{ minWidth: '140px', fontSize: '12px' }}
+                              >
+                                {ORDER_STATUSES.map(s => (
+                                  <option key={s.key} value={s.key}>{s.label}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span className="badge bg-success">Completado</span>
                             )}
                           </td>
                           <td>

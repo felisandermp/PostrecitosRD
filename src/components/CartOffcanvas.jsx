@@ -237,7 +237,7 @@ const CartOffcanvas = () => {
                 className="btn btn-primary mt-3"
                 onClick={() => {
                   closeCart();
-                  navigate('/sales');
+                  navigate('/admin/sales');
                 }}
               >
                 <i className="bi bi-shop me-2"></i>

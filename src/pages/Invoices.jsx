@@ -23,9 +23,9 @@ const Invoices = () => {
     }
   };
 
-  const handleDownloadPDF = (invoice) => {
+  const handleDownloadPDF = async (invoice) => {
     try {
-      invoiceService.downloadInvoicePDF(invoice);
+      await invoiceService.downloadInvoicePDF(invoice);
     } catch (error) {
       console.error('Error al descargar PDF:', error);
       alert('Error al generar PDF');

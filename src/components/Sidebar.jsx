@@ -10,7 +10,8 @@ const Sidebar = () => {
     { path: '/admin/products', icon: 'bi-box-seam', label: 'Productos', roles: ['admin'] },
     { path: '/admin/inventory', icon: 'bi-clipboard-data', label: 'Inventario', roles: ['admin'] },
     { path: '/admin/invoices', icon: 'bi-receipt', label: 'Facturas', roles: ['admin', 'empleado'] },
-    { path: '/admin/sales-history', icon: 'bi-clock-history', label: 'Historial', roles: ['admin', 'empleado'] }
+    { path: '/admin/sales-history', icon: 'bi-clock-history', label: 'Historial', roles: ['admin', 'empleado'] },
+    { path: '/admin/order-history', icon: 'bi-truck', label: 'Pedidos Online', roles: ['admin', 'empleado'] }
   ];
 
   const userRole = isAdmin() ? 'admin' : 'empleado';

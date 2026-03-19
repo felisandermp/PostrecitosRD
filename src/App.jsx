@@ -10,6 +10,7 @@ import Inventory from './pages/Inventory';
 import Sales from './pages/Sales';
 import Invoices from './pages/Invoices';
 import SalesHistory from './pages/SalesHistory';
+import OrderHistory from './pages/OrderHistory';
 import CartOffcanvas from './components/CartOffcanvas';
 import Store from './pages/Store';
 import OrderConfirmation from './pages/OrderConfirmation';
@@ -53,7 +54,10 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={
               <ProtectedRoute>
-                <Layout />
+                <>
+                  <Layout />
+                  <CartOffcanvas />
+                </>
               </ProtectedRoute>
             }>
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
@@ -63,9 +67,9 @@ function App() {
               <Route path="sales" element={<Sales />} />
               <Route path="invoices" element={<Invoices />} />
               <Route path="sales-history" element={<SalesHistory />} />
+              <Route path="order-history" element={<OrderHistory />} />
             </Route>
           </Routes>
-          <CartOffcanvas />
         </Router>
       </CartProvider>
     </AuthProvider>

@@ -40,12 +40,6 @@ const StoreNavbar = () => {
         <div className="collapse navbar-collapse" id="storeNavbar">
           <ul className="navbar-nav ms-auto align-items-center">
             <li className="nav-item">
-              <Link className="nav-link" to="/store">
-                <i className="bi bi-shop me-1"></i>
-                Tienda
-              </Link>
-            </li>
-            <li className="nav-item">
               <Link className="nav-link" to="/store/orders">
                 <i className="bi bi-receipt me-1"></i>
                 Mis Pedidos
@@ -63,12 +57,6 @@ const StoreNavbar = () => {
                   </span>
                 )}
               </button>
-            </li>
-            <li className="nav-item ms-2">
-              <Link className="btn btn-outline-secondary" to="/login">
-                <i className="bi bi-box-arrow-in-right me-1"></i>
-                Admin
-              </Link>
             </li>
           </ul>
         </div>
