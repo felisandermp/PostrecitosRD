@@ -66,7 +66,7 @@ const Store = () => {
 
   const showToast = (message, type = 'success') => {
     const toast = document.createElement('div');
-    toast.className = 'position-fixed top-0 end-0 p-3';
+    toast.className = 'position-fixed bottom-0 end-0 p-3';
     toast.style.zIndex = '9999';
     toast.innerHTML = `
       <div class="toast show" role="alert">
@@ -174,8 +174,8 @@ const Store = () => {
                   <div className="d-flex justify-content-between align-items-center mt-3">
                     <div>
                       <h4 className="text-primary mb-0">${product.price.toFixed(2)}</h4>
-                      <small className="text-muted">
-                        {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
+                      <small className={product.stock <= 10 && product.stock > 0 ? 'text-danger fw-bold' : 'text-muted'}>
+                        {product.stock === 0 ? 'Agotado' : product.stock <= 10 ? `Quedan ${product.stock} unidades` : ''}
                       </small>
                     </div>
                     <button
@@ -242,7 +242,7 @@ const Store = () => {
                       <div className="mb-4">
                         <strong>Disponibilidad:</strong>
                         <span className={`ms-2 badge ${selectedProduct.stock > 10 ? 'bg-success' : selectedProduct.stock > 0 ? 'bg-warning text-dark' : 'bg-danger'}`}>
-                          {selectedProduct.stock > 0 ? `${selectedProduct.stock} en stock` : 'Agotado'}
+                          {selectedProduct.stock === 0 ? 'Agotado' : selectedProduct.stock <= 10 ? 'Pocas unidades' : 'En stock'}
                         </span>
                       </div>
 
@@ -276,7 +276,6 @@ const Store = () => {
                             <i className="bi bi-plus"></i>
                           </button>
                         </div>
-                        <small className="text-muted">Máximo: {selectedProduct.stock} unidades</small>
                       </div>
 
                       {/* Total */}
@@ -313,6 +312,30 @@ const Store = () => {
           <div className="modal-backdrop show"></div>
         </>
       )}
+
+      {/* Banner Info de la Tienda */}
+      <div style={{ background: 'linear-gradient(135deg, #8B4513, #D2691E)', marginTop: '2rem' }}>
+        <div className="container py-3">
+          <div className="row text-center align-items-center">
+            <div className="col-md-3 mb-2 mb-md-0">
+              <i className="bi bi-clock me-2 text-white"></i>
+              <small className="text-white"><strong>Horario:</strong> Lun - Sáb 8:00 AM - 7:00 PM</small>
+            </div>
+            <div className="col-md-3 mb-2 mb-md-0">
+              <i className="bi bi-telephone me-2 text-white"></i>
+              <small className="text-white"><strong>Tel:</strong> (809) 753-5382</small>
+            </div>
+            <div className="col-md-3 mb-2 mb-md-0">
+              <i className="bi bi-geo-alt me-2 text-white"></i>
+              <small className="text-white"><strong>Av. La Gaviota, Ciudad Real Ecologica CJB, Santo Domingo Este</strong></small>
+            </div>
+            <div className="col-md-3 mb-2 mb-md-0">
+              <i className="bi bi-truck me-2 text-white"></i>
+              <small className="text-white"><strong>Delivery disponible</strong></small>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

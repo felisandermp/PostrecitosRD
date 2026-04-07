@@ -6,6 +6,8 @@ const Invoices = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewInvoice, setPreviewInvoice] = useState(null);
 
   useEffect(() => {
     loadInvoices();
@@ -28,24 +30,53 @@ const Invoices = () => {
       await invoiceService.downloadInvoicePDF(invoice);
     } catch (error) {
       console.error('Error al descargar PDF:', error);
-      alert('Error al generar PDF');
     }
+  };
+
+  const handlePreviewPDF = async (invoice) => {
+    try {
+      const doc = await invoiceService.generateInvoicePDF(invoice);
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
+      setPreviewInvoice(invoice);
+    } catch (error) {
+      console.error('Error al generar vista previa:', error);
+    }
+  };
+
+  const handlePrintPDF = async (invoice) => {
+    try {
+      const doc = await invoiceService.generateInvoicePDF(invoice);
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const printWindow = window.open(url);
+      if (printWindow) {
+        printWindow.onload = () => printWindow.print();
+      }
+    } catch (error) {
+      console.error('Error al imprimir:', error);
+    }
+  };
+
+  const closePreview = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setPreviewInvoice(null);
   };
 
   const filteredInvoices = invoices.filter(invoice => {
     const matchesSearch = invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (invoice.customer?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-    
     let matchesDate = true;
     if (dateFilter) {
       const invoiceDate = new Date(invoice.date.seconds * 1000).toISOString().split('T')[0];
       matchesDate = invoiceDate === dateFilter;
     }
-    
     return matchesSearch && matchesDate;
   });
 
-  const totalAmount = filteredInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
+  const totalAmount = filteredInvoices.reduce((sum, inv) => sum + inv.total, 0);
 
   if (loading) {
     return (
@@ -64,15 +95,13 @@ const Invoices = () => {
           <i className="bi bi-receipt me-2"></i>
           Gestión de Facturas
         </h1>
-        <div className="d-flex gap-2">
-          <button className="btn btn-outline-primary" onClick={loadInvoices}>
-            <i className="bi bi-arrow-clockwise me-2"></i>
-            Actualizar
-          </button>
-        </div>
+        <button className="btn btn-outline-primary" onClick={loadInvoices}>
+          <i className="bi bi-arrow-clockwise me-2"></i>
+          Actualizar
+        </button>
       </div>
 
-      {/* Filtros y estadísticas */}
+      {/* Filtros */}
       <div className="row mb-4">
         <div className="col-md-8">
           <div className="card">
@@ -81,31 +110,17 @@ const Invoices = () => {
                 <div className="col-md-6">
                   <div className="search-box">
                     <i className="bi bi-search"></i>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Buscar por número de factura..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                    <input type="text" className="form-control" placeholder="Buscar por número o cliente..."
+                      value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                   </div>
                 </div>
                 <div className="col-md-4">
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={dateFilter}
-                    onChange={(e) => setDateFilter(e.target.value)}
-                  />
+                  <input type="date" className="form-control" value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)} />
                 </div>
                 <div className="col-md-2">
-                  <button 
-                    className="btn btn-outline-secondary w-100"
-                    onClick={() => {
-                      setSearchTerm('');
-                      setDateFilter('');
-                    }}
-                  >
+                  <button className="btn btn-outline-secondary w-100"
+                    onClick={() => { setSearchTerm(''); setDateFilter(''); }}>
                     <i className="bi bi-x-circle"></i>
                   </button>
                 </div>
@@ -113,7 +128,6 @@ const Invoices = () => {
             </div>
           </div>
         </div>
-        
         <div className="col-md-4">
           <div className="card stats-card success">
             <div className="card-body">
@@ -143,7 +157,7 @@ const Invoices = () => {
                     <th>Fecha</th>
                     <th>Cliente</th>
                     <th>Tipo</th>
-                    <th>Método Pago</th>
+                    <th>Pago</th>
                     <th>Subtotal</th>
                     <th>IVA</th>
                     <th>Total</th>
@@ -153,9 +167,7 @@ const Invoices = () => {
                 <tbody>
                   {filteredInvoices.map(invoice => (
                     <tr key={invoice.id}>
-                      <td>
-                        <strong className="text-primary">{invoice.invoiceNumber}</strong>
-                      </td>
+                      <td><strong className="text-primary">{invoice.invoiceNumber}</strong></td>
                       <td>
                         {new Date(invoice.date.seconds * 1000).toLocaleDateString()}
                         <br />
@@ -166,59 +178,30 @@ const Invoices = () => {
                       <td>
                         {invoice.customer?.name || 'Cliente General'}
                         {invoice.customer?.phone && (
-                          <>
-                            <br />
-                            <small className="text-muted">
-                              <i className="bi bi-telephone me-1"></i>
-                              {invoice.customer.phone}
-                            </small>
-                          </>
+                          <><br /><small className="text-muted"><i className="bi bi-telephone me-1"></i>{invoice.customer.phone}</small></>
                         )}
                       </td>
                       <td>
                         {invoice.type === 'online' ? (
-                          <span className="badge bg-info">
-                            <i className="bi bi-globe me-1"></i>
-                            Online
-                          </span>
+                          <span className="badge bg-info"><i className="bi bi-globe me-1"></i>Online</span>
                         ) : (
-                          <span className="badge bg-secondary">
-                            <i className="bi bi-shop me-1"></i>
-                            Tienda
-                          </span>
+                          <span className="badge bg-secondary"><i className="bi bi-shop me-1"></i>Tienda</span>
                         )}
                       </td>
-                      <td>
-                        <span className="badge bg-secondary">
-                          {invoice.paymentMethod}
-                        </span>
-                      </td>
+                      <td><span className="badge bg-secondary">{invoice.paymentMethod}</span></td>
                       <td>${invoice.subtotal.toFixed(2)}</td>
                       <td>${(invoice.tax || 0).toFixed(2)}</td>
-                      <td>
-                        <strong>${invoice.total.toFixed(2)}</strong>
-                      </td>
+                      <td><strong>${invoice.total.toFixed(2)}</strong></td>
                       <td>
                         <div className="btn-group" role="group">
-                          <button
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => handleDownloadPDF(invoice)}
-                            title="Descargar PDF"
-                          >
+                          <button className="btn btn-sm btn-outline-info" onClick={() => handlePreviewPDF(invoice)} title="Vista previa">
+                            <i className="bi bi-eye"></i>
+                          </button>
+                          <button className="btn btn-sm btn-outline-primary" onClick={() => handleDownloadPDF(invoice)} title="Descargar PDF">
                             <i className="bi bi-download"></i>
                           </button>
-                          <button
-                            className="btn btn-sm btn-outline-info"
-                            onClick={() => {
-                              // Mostrar detalles de la factura
-                              const details = invoice.products.map(p => 
-                                `${p.name} x${p.quantity} = $${p.subtotal.toFixed(2)}`
-                              ).join('\n');
-                              alert(`Detalles de ${invoice.invoiceNumber}:\n\n${details}`);
-                            }}
-                            title="Ver detalles"
-                          >
-                            <i className="bi bi-eye"></i>
+                          <button className="btn btn-sm btn-outline-success" onClick={() => handlePrintPDF(invoice)} title="Imprimir">
+                            <i className="bi bi-printer"></i>
                           </button>
                         </div>
                       </td>
@@ -231,23 +214,20 @@ const Invoices = () => {
             <div className="text-center py-5">
               <i className="bi bi-receipt display-4 text-muted mb-3"></i>
               <p className="text-muted">
-                {invoices.length === 0 ? 'No hay facturas registradas' : 'No se encontraron facturas con los filtros aplicados'}
+                {invoices.length === 0 ? 'No hay facturas registradas' : 'No se encontraron facturas'}
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Resumen de productos más vendidos */}
+      {/* Resumen */}
       {filteredInvoices.length > 0 && (
         <div className="row mt-4">
           <div className="col-md-6">
             <div className="card">
               <div className="card-header">
-                <h5 className="mb-0">
-                  <i className="bi bi-graph-up me-2"></i>
-                  Resumen del Período
-                </h5>
+                <h5 className="mb-0"><i className="bi bi-graph-up me-2"></i>Resumen del Período</h5>
               </div>
               <div className="card-body">
                 <div className="row text-center">
@@ -266,6 +246,37 @@ const Invoices = () => {
                     <small className="text-muted">Promedio</small>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Vista Previa PDF */}
+      {previewUrl && (
+        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 9998 }}
+          onClick={closePreview}>
+          <div className="modal-dialog modal-xl modal-dialog-centered" style={{ maxWidth: '900px' }}
+            onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content">
+              <div className="modal-header py-2">
+                <h6 className="modal-title">
+                  <i className="bi bi-file-earmark-pdf me-2"></i>
+                  Vista Previa - {previewInvoice?.invoiceNumber}
+                </h6>
+                <div className="d-flex gap-2">
+                  <button className="btn btn-sm btn-primary" onClick={() => handleDownloadPDF(previewInvoice)}>
+                    <i className="bi bi-download me-1"></i>Descargar
+                  </button>
+                  <button className="btn btn-sm btn-success" onClick={() => handlePrintPDF(previewInvoice)}>
+                    <i className="bi bi-printer me-1"></i>Imprimir
+                  </button>
+                  <button type="button" className="btn-close" onClick={closePreview}></button>
+                </div>
+              </div>
+              <div className="modal-body p-0">
+                <iframe src={previewUrl} style={{ width: '100%', height: '75vh', border: 'none' }}
+                  title="Vista previa factura"></iframe>
               </div>
             </div>
           </div>

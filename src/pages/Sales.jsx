@@ -46,7 +46,7 @@ const Sales = () => {
       addToCart(product, 1);
       // Mostrar notificación de éxito
       const toast = document.createElement('div');
-      toast.className = 'position-fixed top-0 end-0 p-3';
+      toast.className = 'position-fixed bottom-0 end-0 p-3';
       toast.style.zIndex = '9999';
       toast.innerHTML = `
         <div class="toast show" role="alert">

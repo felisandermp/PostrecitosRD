@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { notificationService } from '../services/notificationService';
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -26,9 +27,10 @@ const OrderHistory = () => {
     const map = {
       pendiente: { color: 'warning', text: 'Pendiente', icon: 'bi-clock' },
       confirmado: { color: 'info', text: 'Confirmado', icon: 'bi-check-circle' },
-      en_preparacion: { color: 'primary', text: 'En Preparacion', icon: 'bi-fire' },
+      en_preparacion: { color: 'primary', text: 'En Preparación', icon: 'bi-fire' },
       listo: { color: 'success', text: 'Listo', icon: 'bi-box-seam' },
-      entregado: { color: 'secondary', text: 'Entregado', icon: 'bi-house-check' },
+      entregado: { color: 'info', text: 'Entregado', icon: 'bi-truck' },
+      cerrado: { color: 'secondary', text: 'Cerrado', icon: 'bi-house-check' },
       cancelado: { color: 'danger', text: 'Cancelado', icon: 'bi-x-circle' }
     };
     return map[status] || { color: 'secondary', text: status, icon: 'bi-question' };
@@ -63,16 +65,22 @@ const OrderHistory = () => {
     }
 
     loadOrders();
+
+    // Enviar notificacion al cliente
+    const order = customerOrders.find(o => o.id === orderId) || adminOrders.find(o => o.id === orderId);
+    if (order) {
+      notificationService.notifyStatusChange(order, newStatus);
+    }
   };
 
   const filteredOrders = filter === 'todos'
     ? orders
     : filter === 'activos'
-      ? orders.filter(o => o.status !== 'entregado' && o.status !== 'cancelado')
+      ? orders.filter(o => o.status !== 'cerrado' && o.status !== 'cancelado')
       : orders.filter(o => o.status === filter);
 
-  const activeCount = orders.filter(o => o.status !== 'entregado' && o.status !== 'cancelado').length;
-  const deliveredCount = orders.filter(o => o.status === 'entregado').length;
+  const activeCount = orders.filter(o => o.status !== 'cerrado' && o.status !== 'cancelado').length;
+  const deliveredCount = orders.filter(o => o.status === 'cerrado').length;
 
   if (loading) {
     return (
@@ -130,7 +138,7 @@ const OrderHistory = () => {
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="card-subtitle mb-2 text-muted">Entregados</h6>
+                  <h6 className="card-subtitle mb-2 text-muted">Cerrados</h6>
                   <h3 className="card-title mb-0">{deliveredCount}</h3>
                 </div>
                 <div className="text-success"><i className="bi bi-check-circle display-6"></i></div>
@@ -149,9 +157,10 @@ const OrderHistory = () => {
               { key: 'activos', label: 'Activos', icon: 'bi-hourglass' },
               { key: 'pendiente', label: 'Pendientes', icon: 'bi-clock' },
               { key: 'confirmado', label: 'Confirmados', icon: 'bi-check-circle' },
-              { key: 'en_preparacion', label: 'En Preparacion', icon: 'bi-fire' },
+              { key: 'en_preparacion', label: 'En Preparación', icon: 'bi-fire' },
               { key: 'listo', label: 'Listos', icon: 'bi-box-seam' },
-              { key: 'entregado', label: 'Entregados', icon: 'bi-house-check' },
+              { key: 'entregado', label: 'Entregados', icon: 'bi-truck' },
+              { key: 'cerrado', label: 'Cerrados', icon: 'bi-house-check' },
               { key: 'cancelado', label: 'Cancelados', icon: 'bi-x-circle' }
             ].map(f => (
               <button
@@ -180,7 +189,7 @@ const OrderHistory = () => {
           {filteredOrders.length === 0 ? (
             <div className="text-center py-5">
               <i className="bi bi-inbox display-4 text-muted mb-3"></i>
-              <p className="text-muted">No hay pedidos en esta categoria</p>
+              <p className="text-muted">No hay pedidos en esta categoría</p>
             </div>
           ) : (
             <div className="table-responsive">
@@ -236,7 +245,7 @@ const OrderHistory = () => {
                           )}
                         </td>
                         <td>
-                          {order.status !== 'entregado' && order.status !== 'cancelado' ? (
+                          {order.status !== 'cerrado' && order.status !== 'cancelado' ? (
                             <select
                               className="form-select form-select-sm"
                               value={order.status}
@@ -245,13 +254,15 @@ const OrderHistory = () => {
                             >
                               <option value="pendiente">Pendiente</option>
                               <option value="confirmado">Confirmado</option>
-                              <option value="en_preparacion">En Preparacion</option>
+                              <option value="en_preparacion">En Preparación</option>
                               <option value="listo">Listo</option>
                               <option value="entregado">Entregado</option>
                               <option value="cancelado">Cancelado</option>
                             </select>
                           ) : (
-                            <span className="text-muted small">Finalizado</span>
+                            <span className="text-muted small">
+                              {order.status === 'cerrado' ? 'Confirmado por cliente' : 'Finalizado'}
+                            </span>
                           )}
                         </td>
                       </tr>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { inventoryService } from '../services/inventoryService';
+import { notificationService } from '../services/notificationService';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -15,6 +16,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
+    notificationService.requestPushPermission();
   }, []);
 
   const loadDashboardData = async () => {

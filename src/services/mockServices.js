@@ -407,7 +407,7 @@ export const invoiceService = {
     doc.setFillColor(...brown);
     doc.rect(0, 0, pageWidth, 40, 'F');
 
-    // Logo en alta resolucion - fondo marron para fusionar con header
+    // Logo circular - recortar en circulo y pintar fondo marron solo afuera
     try {
       const logoData = await new Promise((resolve, reject) => {
         const img = new Image();
@@ -418,10 +418,23 @@ export const invoiceService = {
           canvas.width = size;
           canvas.height = size;
           const ctx = canvas.getContext('2d');
-          // Pintar fondo con el mismo marron del header para que se funda
+          const half = size / 2;
+          // Fondo marron en todo el canvas
           ctx.fillStyle = 'rgb(139, 69, 19)';
           ctx.fillRect(0, 0, size, size);
+          // Recortar en circulo y dibujar la imagen dentro
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(half, half, half, 0, Math.PI * 2);
+          ctx.clip();
           ctx.drawImage(img, 0, 0, size, size);
+          ctx.restore();
+          // Borde circular blanco
+          ctx.beginPath();
+          ctx.arc(half, half, half - 2, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.lineWidth = size * 0.02;
+          ctx.stroke();
           resolve(canvas.toDataURL('image/png'));
         };
         img.onerror = reject;
@@ -464,12 +477,13 @@ export const invoiceService = {
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...darkBrown);
-    doc.text('Cliente:', 20, 100);
+    doc.text('Cliente: ', 20, 100);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(60, 60, 60);
     const customerName = invoice.customer?.name || 'Cliente General';
     const customerPhone = invoice.customer?.phone ? ('  |  Tel: ' + invoice.customer.phone) : '';
-    doc.text(customerName + customerPhone, 48, 100);
+    const clienteLabelWidth = doc.getTextWidth('Cliente: ');
+    doc.text(customerName + customerPhone, 20 + clienteLabelWidth, 100);
     if (invoice.customer?.email) {
       doc.text('Email: ' + invoice.customer.email, 20, 108);
     }

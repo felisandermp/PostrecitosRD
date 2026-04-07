@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 const ORDER_STEPS = [
   { key: 'pendiente', label: 'Pendiente', icon: 'bi-clock' },
   { key: 'confirmado', label: 'Confirmado', icon: 'bi-check-circle' },
-  { key: 'en_preparacion', label: 'En Preparacion', icon: 'bi-fire' },
+  { key: 'en_preparacion', label: 'En Preparación', icon: 'bi-fire' },
   { key: 'listo', label: 'Listo', icon: 'bi-box-seam' },
-  { key: 'entregado', label: 'Entregado', icon: 'bi-house-check' }
+  { key: 'entregado', label: 'Entregado', icon: 'bi-truck' },
+  { key: 'cerrado', label: 'Cerrado', icon: 'bi-house-check' }
 ];
 
 const CustomerOrders = () => {
@@ -32,14 +33,14 @@ const CustomerOrders = () => {
   };
 
   const confirmDelivery = (orderId) => {
-    const newStatus = 'entregado';
+    const newStatus = 'cerrado';
 
     // Actualizar customerOrders
     const customerOrders = JSON.parse(localStorage.getItem('customerOrders') || '[]');
     const custIdx = customerOrders.findIndex(o => o.id === orderId);
     if (custIdx !== -1) {
       customerOrders[custIdx].status = newStatus;
-      customerOrders[custIdx].deliveredAt = new Date().toISOString();
+      customerOrders[custIdx].closedAt = new Date().toISOString();
       localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
     }
 
@@ -48,7 +49,7 @@ const CustomerOrders = () => {
     const adminIdx = adminOrders.findIndex(o => o.id === orderId);
     if (adminIdx !== -1) {
       adminOrders[adminIdx].status = newStatus;
-      adminOrders[adminIdx].deliveredAt = new Date().toISOString();
+      adminOrders[adminIdx].closedAt = new Date().toISOString();
       localStorage.setItem('orders', JSON.stringify(adminOrders));
     }
 
@@ -57,7 +58,7 @@ const CustomerOrders = () => {
     const mockIdx = mockOrders.findIndex(o => o.id === orderId);
     if (mockIdx !== -1) {
       mockOrders[mockIdx].status = newStatus;
-      mockOrders[mockIdx].deliveredAt = new Date().toISOString();
+      mockOrders[mockIdx].closedAt = new Date().toISOString();
       localStorage.setItem('mockOrders', JSON.stringify(mockOrders));
     }
 
@@ -77,14 +78,15 @@ const CustomerOrders = () => {
       confirmado: '#5bc0de',
       en_preparacion: '#0d6efd',
       listo: '#198754',
-      entregado: '#6c757d',
+      entregado: '#17a2b8',
+      cerrado: '#6c757d',
       cancelado: '#dc3545'
     };
     return colors[status] || '#6c757d';
   };
 
-  const activeOrders = orders.filter(o => o.status !== 'entregado' && o.status !== 'cancelado');
-  const historyOrders = orders.filter(o => o.status === 'entregado' || o.status === 'cancelado');
+  const activeOrders = orders.filter(o => o.status !== 'cerrado' && o.status !== 'cancelado');
+  const historyOrders = orders.filter(o => o.status === 'cerrado' || o.status === 'cancelado');
 
   const displayOrders = tab === 'activos' ? activeOrders : historyOrders;
 
@@ -138,7 +140,7 @@ const CustomerOrders = () => {
       {orders.length === 0 ? (
         <div className="text-center py-5">
           <i className="bi bi-inbox display-1 text-muted mb-3"></i>
-          <h4 className="text-muted">No tienes pedidos aun</h4>
+          <h4 className="text-muted">No tienes pedidos aún</h4>
           <p className="text-muted">Realiza tu primer pedido en nuestra tienda</p>
           <a href="/store" className="btn btn-primary mt-3">
             <i className="bi bi-shop me-2"></i>
@@ -157,8 +159,8 @@ const CustomerOrders = () => {
           {displayOrders.map(order => {
             const currentStep = getStepIndex(order.status);
             const isCancelled = order.status === 'cancelado';
+            const isClosed = order.status === 'cerrado';
             const isDelivered = order.status === 'entregado';
-            const isReady = order.status === 'listo';
             const statusColor = getStatusColor(order.status);
 
             return (
@@ -176,15 +178,27 @@ const CustomerOrders = () => {
                   <div className="card-body">
                     {/* Barra de progreso */}
                     {!isCancelled ? (
+                      (() => {
+                        const total = ORDER_STEPS.length;
+                        const stepWidth = 100 / total;
+                        const lineStart = stepWidth / 2;
+                        const lineEnd = 100 - stepWidth / 2;
+                        const lineTotal = lineEnd - lineStart;
+                        const progressPct = currentStep > 0 ? (currentStep / (total - 1)) * lineTotal : 0;
+                        return (
                       <div className="mb-4 px-2">
                         <div className="d-flex justify-content-between position-relative" style={{ marginBottom: '8px' }}>
+                          {/* Linea gris de fondo */}
                           <div style={{
-                            position: 'absolute', top: '20px', left: '24px', right: '24px',
+                            position: 'absolute', top: '18px',
+                            left: `${lineStart}%`, right: `${stepWidth / 2}%`,
                             height: '4px', backgroundColor: '#e9ecef', borderRadius: '2px', zIndex: 0
                           }}></div>
+                          {/* Linea de progreso */}
                           <div style={{
-                            position: 'absolute', top: '20px', left: '24px',
-                            width: `${(currentStep / (ORDER_STEPS.length - 1)) * (100 - (48 / 5))}%`,
+                            position: 'absolute', top: '18px',
+                            left: `${lineStart}%`,
+                            width: `${progressPct}%`,
                             height: '4px', backgroundColor: statusColor, borderRadius: '2px',
                             zIndex: 1, transition: 'width 0.5s ease'
                           }}></div>
@@ -210,6 +224,8 @@ const CustomerOrders = () => {
                           ))}
                         </div>
                       </div>
+                        );
+                      })()
                     ) : (
                       <div className="alert alert-danger d-flex align-items-center mb-3" role="alert">
                         <i className="bi bi-x-circle-fill me-2 fs-5"></i>
@@ -218,13 +234,13 @@ const CustomerOrders = () => {
                     )}
 
                     {/* Boton confirmar entrega */}
-                    {isReady && (
+                    {isDelivered && (
                       <div className="mb-3">
                         {confirmingId === order.id ? (
                           <div className="alert alert-success border-2 mb-0">
                             <div className="d-flex align-items-center mb-2">
                               <i className="bi bi-question-circle-fill me-2 fs-5"></i>
-                              <strong>Confirmas que recibiste tu pedido?</strong>
+                              <strong>¿Confirmas que recibiste tu pedido?</strong>
                             </div>
                             <div className="d-flex gap-2">
                               <button
@@ -232,7 +248,7 @@ const CustomerOrders = () => {
                                 onClick={() => confirmDelivery(order.id)}
                               >
                                 <i className="bi bi-check-lg me-1"></i>
-                                Si, lo recibi
+                                Sí, lo recibí
                               </button>
                               <button
                                 className="btn btn-outline-secondary btn-sm"
@@ -254,15 +270,15 @@ const CustomerOrders = () => {
                       </div>
                     )}
 
-                    {/* Info entregado */}
-                    {isDelivered && order.deliveredAt && (
+                    {/* Info cerrado */}
+                    {isClosed && order.closedAt && (
                       <div className="alert alert-light border mb-3 d-flex align-items-center">
                         <i className="bi bi-check-circle-fill text-success me-2 fs-5"></i>
                         <div>
-                          <strong>Entrega confirmada</strong>
+                          <strong>Entrega confirmada - Pedido cerrado</strong>
                           <br />
                           <small className="text-muted">
-                            {new Date(order.deliveredAt).toLocaleDateString('es-DO', {
+                            {new Date(order.closedAt).toLocaleDateString('es-DO', {
                               year: 'numeric', month: 'long', day: 'numeric',
                               hour: '2-digit', minute: '2-digit'
                             })}

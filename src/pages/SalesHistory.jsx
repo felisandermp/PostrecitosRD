@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { orderService } from '../services/orderService';
+import { notificationService } from '../services/notificationService';
 
 const SalesHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -13,9 +14,10 @@ const SalesHistory = () => {
   const ORDER_STATUSES = [
     { key: 'pendiente', label: 'Pendiente', color: 'warning' },
     { key: 'confirmado', label: 'Confirmado', color: 'info' },
-    { key: 'en_preparacion', label: 'En Preparacion', color: 'primary' },
+    { key: 'en_preparacion', label: 'En Preparación', color: 'primary' },
     { key: 'listo', label: 'Listo para Entrega', color: 'success' },
-    { key: 'entregado', label: 'Entregado', color: 'secondary' },
+    { key: 'entregado', label: 'Entregado', color: 'info' },
+    { key: 'cerrado', label: 'Cerrado', color: 'secondary' },
     { key: 'cancelado', label: 'Cancelado', color: 'danger' }
   ];
 
@@ -104,6 +106,12 @@ const SalesHistory = () => {
 
     // Actualizar estado local
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+
+    // Enviar notificacion al cliente
+    const order = customerOrders.find(o => o.id === orderId) || adminOrders.find(o => o.id === orderId);
+    if (order) {
+      notificationService.notifyStatusChange({ ...order, status: newStatus }, newStatus);
+    }
   };
 
   const exportToCSV = () => {

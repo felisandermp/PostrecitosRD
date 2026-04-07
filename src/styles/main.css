@@ -352,6 +352,7 @@ body {
   transition: all 0.3s ease;
   border: 2px solid transparent;
   height: 100%;
+  overflow: hidden;
 }
 
 .product-card-store:hover {
@@ -532,4 +533,19 @@ body {
 .checkout-form .form-select:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 0.2rem rgba(139, 69, 19, 0.15);
+}
+
+/* Notification Toasts */
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Capitalizar badges */
+.badge {
+  text-transform: capitalize;
 }
