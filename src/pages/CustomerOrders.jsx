@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { notificationService } from '../services/notificationService';
 
 const ORDER_STEPS = [
   { key: 'pendiente', label: 'Pendiente', icon: 'bi-clock' },
@@ -64,6 +65,69 @@ const CustomerOrders = () => {
 
     setConfirmingId(null);
     loadOrders();
+
+    // Notificar al admin por Telegram que el cliente confirmo la entrega
+    const order = customerOrders.find(o => o.id === orderId);
+    if (order) {
+      const customerName = order.customer?.name || 'Cliente';
+      const msg = '\u2705 <b>Entrega Confirmada</b>\n\n'
+        + '\u{1F4CB} <b>Pedido:</b> #' + orderId + '\n'
+        + '\u{1F464} <b>Cliente:</b> ' + customerName + '\n'
+        + 'El cliente confirmo que recibio su pedido correctamente.';
+      notificationService.sendTelegram(msg);
+    }
+  };
+
+  const reportNotReceived = (orderId) => {
+    const newStatus = 'no_recibido';
+
+    // Actualizar customerOrders
+    const customerOrders = JSON.parse(localStorage.getItem('customerOrders') || '[]');
+    const custIdx = customerOrders.findIndex(o => o.id === orderId);
+    let orderData = null;
+    if (custIdx !== -1) {
+      customerOrders[custIdx].status = newStatus;
+      customerOrders[custIdx].notReceivedAt = new Date().toISOString();
+      orderData = customerOrders[custIdx];
+      localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
+    }
+
+    // Actualizar orders (admin)
+    const adminOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const adminIdx = adminOrders.findIndex(o => o.id === orderId);
+    if (adminIdx !== -1) {
+      adminOrders[adminIdx].status = newStatus;
+      adminOrders[adminIdx].notReceivedAt = new Date().toISOString();
+      localStorage.setItem('orders', JSON.stringify(adminOrders));
+    }
+
+    // Actualizar mockOrders
+    const mockOrders = JSON.parse(localStorage.getItem('mockOrders') || '[]');
+    const mockIdx = mockOrders.findIndex(o => o.id === orderId);
+    if (mockIdx !== -1) {
+      mockOrders[mockIdx].status = newStatus;
+      mockOrders[mockIdx].notReceivedAt = new Date().toISOString();
+      localStorage.setItem('mockOrders', JSON.stringify(mockOrders));
+    }
+
+    // Notificar al admin por Telegram
+    if (orderData) {
+      const customerName = orderData.customer?.name || 'Cliente';
+      const customerPhone = orderData.customer?.phone || '';
+      const productsList = orderData.products.map(function(p) { return p.quantity + 'x ' + p.name; }).join(', ');
+      const msg = '\u26A0\uFE0F <b>ALERTA: Pedido NO Recibido</b>\n\n'
+        + '\u{1F4CB} <b>Pedido:</b> #' + orderId + '\n'
+        + '\u{1F464} <b>Cliente:</b> ' + customerName + '\n'
+        + '\u{1F4DE} <b>Tel:</b> ' + customerPhone + '\n'
+        + '\u{1F6D2} <b>Productos:</b> ' + productsList + '\n'
+        + '\u{1F4B0} <b>Total:</b> $' + orderData.total.toFixed(2) + '\n\n'
+        + 'El cliente reporta que NO recibio su pedido. Requiere atencion inmediata.';
+      notificationService.sendTelegram(msg);
+    }
+
+    setConfirmingId(null);
+    loadOrders();
+    alert('Hemos notificado al equipo. Te contactaremos pronto para resolver esto.');
   };
 
   const getStepIndex = (status) => {
@@ -80,13 +144,14 @@ const CustomerOrders = () => {
       listo: '#198754',
       entregado: '#17a2b8',
       cerrado: '#6c757d',
-      cancelado: '#dc3545'
+      cancelado: '#dc3545',
+      no_recibido: '#dc3545'
     };
     return colors[status] || '#6c757d';
   };
 
-  const activeOrders = orders.filter(o => o.status !== 'cerrado' && o.status !== 'cancelado');
-  const historyOrders = orders.filter(o => o.status === 'cerrado' || o.status === 'cancelado');
+  const activeOrders = orders.filter(o => o.status !== 'cerrado' && o.status !== 'cancelado' && o.status !== 'no_recibido');
+  const historyOrders = orders.filter(o => o.status === 'cerrado' || o.status === 'cancelado' || o.status === 'no_recibido');
 
   const displayOrders = tab === 'activos' ? activeOrders : historyOrders;
 
@@ -251,6 +316,13 @@ const CustomerOrders = () => {
                                 Sí, lo recibí
                               </button>
                               <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => reportNotReceived(order.id)}
+                              >
+                                <i className="bi bi-x-lg me-1"></i>
+                                No, no lo recibí
+                              </button>
+                              <button
                                 className="btn btn-outline-secondary btn-sm"
                                 onClick={() => setConfirmingId(null)}
                               >
@@ -283,6 +355,18 @@ const CustomerOrders = () => {
                               hour: '2-digit', minute: '2-digit'
                             })}
                           </small>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Info no recibido */}
+                    {order.status === 'no_recibido' && (
+                      <div className="alert alert-danger border mb-3 d-flex align-items-center">
+                        <i className="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                        <div>
+                          <strong>Reportado como no recibido</strong>
+                          <br />
+                          <small>Nuestro equipo fue notificado y te contactaremos pronto.</small>
                         </div>
                       </div>
                     )}

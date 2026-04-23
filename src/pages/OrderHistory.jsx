@@ -31,6 +31,7 @@ const OrderHistory = () => {
       listo: { color: 'success', text: 'Listo', icon: 'bi-box-seam' },
       entregado: { color: 'info', text: 'Entregado', icon: 'bi-truck' },
       cerrado: { color: 'secondary', text: 'Cerrado', icon: 'bi-house-check' },
+      no_recibido: { color: 'danger', text: 'No Recibido', icon: 'bi-exclamation-triangle' },
       cancelado: { color: 'danger', text: 'Cancelado', icon: 'bi-x-circle' }
     };
     return map[status] || { color: 'secondary', text: status, icon: 'bi-question' };
@@ -76,10 +77,10 @@ const OrderHistory = () => {
   const filteredOrders = filter === 'todos'
     ? orders
     : filter === 'activos'
-      ? orders.filter(o => o.status !== 'cerrado' && o.status !== 'cancelado')
+      ? orders.filter(o => o.status !== 'cerrado' && o.status !== 'cancelado' && o.status !== 'no_recibido')
       : orders.filter(o => o.status === filter);
 
-  const activeCount = orders.filter(o => o.status !== 'cerrado' && o.status !== 'cancelado').length;
+  const activeCount = orders.filter(o => o.status !== 'cerrado' && o.status !== 'cancelado' && o.status !== 'no_recibido').length;
   const deliveredCount = orders.filter(o => o.status === 'cerrado').length;
 
   if (loading) {
@@ -245,7 +246,7 @@ const OrderHistory = () => {
                           )}
                         </td>
                         <td>
-                          {order.status !== 'cerrado' && order.status !== 'cancelado' ? (
+                          {order.status !== 'cerrado' && order.status !== 'cancelado' && order.status !== 'no_recibido' ? (
                             <select
                               className="form-select form-select-sm"
                               value={order.status}
@@ -261,7 +262,7 @@ const OrderHistory = () => {
                             </select>
                           ) : (
                             <span className="text-muted small">
-                              {order.status === 'cerrado' ? 'Confirmado por cliente' : 'Finalizado'}
+                              {order.status === 'cerrado' ? 'Confirmado por cliente' : order.status === 'no_recibido' ? 'No recibido' : 'Finalizado'}
                             </span>
                           )}
                         </td>
